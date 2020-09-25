@@ -1,26 +1,90 @@
+namespace SpriteKind {
+    export const Flag = SpriteKind.create()
+    export const Firework = SpriteKind.create()
+}
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Flag, function (sprite, otherSprite) {
+    otherSprite.setFlag(SpriteFlag.Ghost, true)
+    startFireworks()
+})
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     playerSprite.vy = -50
     playerSprite.startEffect(effects.spray)
 })
+function startFireworks () {
+    let fireworkSprite = sprites.create(img`
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    `, SpriteKind.Firework)
+    tiles.placeOnTile(fireworkSprite, tiles.getTileLocation(5, 13))
+    fireworkSprite.vy = -80
+    scene.cameraFollowSprite(fireworkSprite)
+    fireworkSprite.startEffect(effects.spray)
+    fireworkSprite.lifespan = 2300
+}
+
+function explode(sprite:Sprite, speed: number, angle: number) {
+    let vx = speed * Math.cos(angle)
+    let vy = speed * Math.sin(angle)
+    let ashSprite = sprites.createProjectileFromSprite(img`
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . 2 2 . . . . . . .
+        . . . . . . . 2 2 . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+    `, sprite, vx, vy)
+    ashSprite.ay = 100
+    ashSprite.lifespan = 2000
+}
+sprites.onDestroyed(SpriteKind.Firework, function(sprite: Sprite) {
+    for (let i = 0; i < 360; i+=15) {
+        explode(sprite, 50, i / Math.PI)
+    }
+})
 let playerSprite: Sprite = null
+let flagSprite: Sprite = null
 tiles.setTilemap(tiles.createTilemap(hex`0a00100005050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505040404040404040404040404040404040404040403030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030101010101010101010102020202020202020202`, img`
-    . . . . . . . . . . 
-    . . . . . . . . . . 
-    . . . . . . . . . . 
-    . . . . . . . . . . 
-    . . . . . . . . . . 
-    . . . . . . . . . . 
-    . . . . . . . . . . 
-    . . . . . . . . . . 
-    . . . . . . . . . . 
-    . . . . . . . . . . 
-    . . . . . . . . . . 
-    . . . . . . . . . . 
-    . . . . . . . . . . 
-    . . . . . . . . . . 
-    . . . . . . . . . . 
-    . . . . . . . . . . 
-    `, [myTiles.transparency16,sprites.builtin.forestTiles6,sprites.builtin.forestTiles10,myTiles.tile1,myTiles.tile2,myTiles.tile3], TileScale.Sixteen))
+    . . . . . . . . . .
+    . . . . . . . . . .
+    . . . . . . . . . .
+    . . . . . . . . . .
+    . . . . . . . . . .
+    . . . . . . . . . .
+    . . . . . . . . . .
+    . . . . . . . . . .
+    . . . . . . . . . .
+    . . . . . . . . . .
+    . . . . . . . . . .
+    . . . . . . . . . .
+    . . . . . . . . . .
+    . . . . . . . . . .
+    . . . . . . . . . .
+    . . . . . . . . . .
+`, [myTiles.transparency16,sprites.builtin.forestTiles6,sprites.builtin.forestTiles10,myTiles.tile1,myTiles.tile2,myTiles.tile3], TileScale.Sixteen))
 playerSprite = sprites.create(img`
     . . . . . . f f f f . . . . . . 
     . . . . f f f 2 2 f f f . . . . 
@@ -39,7 +103,27 @@ playerSprite = sprites.create(img`
     . . . . . f f f f f f . . . . . 
     . . . . . f f . . f f . . . . . 
     `, SpriteKind.Player)
+controller.moveSprite(playerSprite)
 tiles.placeOnTile(playerSprite, tiles.getTileLocation(1, 13))
+flagSprite = sprites.create(img`
+    . . . . . . . . . . . . . . . .
+    . . . . . . . . . . . . . . . .
+    . . . f 2 2 2 2 2 . . . . 2 2 2
+    . . . f 5 5 2 2 5 2 2 2 2 2 2 2
+    . . . f 5 5 2 5 2 2 2 2 2 2 2 2
+    . . . f 2 2 5 2 2 2 2 2 2 2 2 2
+    . . . f 5 2 2 2 2 2 2 2 2 2 2 2
+    . . . f 2 2 2 2 2 2 2 2 2 2 2 2
+    . . . f 2 2 2 2 2 2 2 2 2 2 2 2
+    . . . f 2 2 2 2 2 2 2 2 2 2 2 2
+    . . . f . . 2 2 2 2 2 2 2 2 2 2
+    . . . f . . . . . . 2 2 . . . .
+    . . . f . . . . . . . . . . . .
+    . . . f . . . . . . . . . . . .
+    . . . f . . . . . . . . . . . .
+    . . . f . . . . . . . . . . . .
+`, SpriteKind.Flag)
+tiles.placeOnTile(flagSprite, tiles.getTileLocation(7, 13))
 let moonSprite = sprites.create(img`
     ................................
     ................................
@@ -50,19 +134,19 @@ let moonSprite = sprites.create(img`
     ........11111111111111111.......
     .......1111111111111111111......
     ......111111111111111111111.....
-    ......1111ddd11111ddddddd11.....
-    .....1111dcbbd111dccccccbd11....
-    ....11111dbb1db11dcccccbbdb11...
-    ....11111db11db11dccccbb1db11...
+    ......1111ddd111111dddddd11.....
+    .....1111dcbbd1111dddccddd11....
+    ....11111dbb1db11dddcccbddb11...
+    ....11111db11db11ddcccbb1db11...
     ....111111dddb111dcccbb11db11...
     ....1111111bb1111dccbb111db11...
-    ....1111111111111dcbb1111db11...
-    ....11111ddddd111dbb11111bb11...
-    ....1111dcccbbd111ddddddbb111...
+    ....1111111111111ddbb1111db11...
+    ....11111ddddd111ddd11111bb11...
+    ....1111ddccbdd111ddddddbb111...
     ....1111dccbb1db1111bbbbb1111...
     ....1111dcbb11db1111111111111...
     ....1111dbb111db1111111111111...
-    ....1111db1111db1111111111111...
+    ....1111dd1111db1111111111111...
     .....1111dddddb1111111111111....
     ......1111bbbb1111111111111.....
     ......111111111111111111111.....
