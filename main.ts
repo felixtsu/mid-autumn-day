@@ -11,54 +11,47 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     playerSprite.startEffect(effects.spray)
 })
 function startFireworks () {
-    let fireworkSprite = sprites.create(img`
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    `, SpriteKind.Firework)
-    tiles.placeOnTile(fireworkSprite, tiles.getTileLocation(5, 13))
-    fireworkSprite.vy = -80
-    scene.cameraFollowSprite(fireworkSprite)
-    fireworkSprite.startEffect(effects.spray)
-    fireworkSprite.lifespan = 2300
+    for (let i = 0; i < 7; i++) {
+        let fireworkSprite = sprites.create(img`
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . 2 2 2 . . . . . . .
+            . . . . . 2 5 5 5 2 . . . . . .
+            . . . . 2 5 5 1 5 5 2 . . . . .
+            . . . 2 5 5 1 1 1 5 5 2 . . . .
+            . . . 2 5 1 1 1 1 1 5 2 . . . .
+            . . . 2 5 5 1 1 1 5 5 2 . . . .
+            . . . . 2 5 5 1 5 5 2 . . . . .
+            . . . . . 2 5 5 5 2 . . . . . .
+            . . . . . . 2 2 2 . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+        `, SpriteKind.Firework)
+        tiles.placeOnTile(fireworkSprite, tiles.getTileLocation(5, 13))
+        fireworkSprite.vy = randint(-100, -140)
+        fireworkSprite.ay = 40
+        fireworkSprite.vx += randint(-30, 30)
+        if (i == 3) {
+            scene.cameraFollowSprite(fireworkSprite)
+        }
+        fireworkSprite.startEffect(effects.spray)
+        fireworkSprite.lifespan = 2300
+        pause(randint(100, 200))
+    }
 }
 
 function explode(sprite:Sprite, speed: number, angle: number) {
     let vx = speed * Math.cos(angle)
     let vy = speed * Math.sin(angle)
-    let ashSprite = sprites.createProjectileFromSprite(img`
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . 2 2 . . . . . . .
-        . . . . . . . 2 2 . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-    `, sprite, vx, vy)
+    let spriteImage:Image = image.create(1, 1)
+    spriteImage.setPixel(0, 0, randint(2, 14))
+    let ashSprite = sprites.createProjectileFromSprite(spriteImage, sprite, vx, vy)
     ashSprite.ay = 100
     ashSprite.lifespan = 2000
+    scene.centerCameraAt(80, 60)
 }
 sprites.onDestroyed(SpriteKind.Firework, function(sprite: Sprite) {
     for (let i = 0; i < 360; i+=15) {
